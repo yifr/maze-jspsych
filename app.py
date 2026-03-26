@@ -1,6 +1,6 @@
 import flask
 from flask import render_template, request, jsonify
-from models import maze_generator
+import maze_generator
 import os
 import json
 
