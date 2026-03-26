@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Maze Game</title>
+
+  <!-- v8 UMD build exposes `jsPsychModule` -->
+  <script src="https://unpkg.com/jspsych@8.2.2/dist/index.browser.js"></script>
+  <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" />
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>  
+  <script src="{{ url_for('static', filename='maze-plugin.js') }}"></script>
+  <script src="{{ url_for('static', filename='maze-select.js') }}"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body></body>
+</html>
