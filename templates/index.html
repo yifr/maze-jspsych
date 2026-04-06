@@ -5,12 +5,27 @@
   <title>Maze Game</title>
 
   <!-- v8 UMD build exposes `jsPsychModule` -->
-  <script src="https://unpkg.com/jspsych@8.2.2/dist/index.browser.js"></script>
-  <link href="https://unpkg.com/jspsych@8.2.2/css/jspsych.css" rel="stylesheet" />
-  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>  
-  <script src="{{ url_for('static', filename='maze-plugin.js') }}"></script>
-  <script src="{{ url_for('static', filename='maze-select.js') }}"></script>
+  <script src="https://unpkg.com/jspsych@8.2.3/dist/index.browser.js"></script>
+  <link href="https://unpkg.com/jspsych@8.2.3/css/jspsych.css" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='custom.css') }}" rel="stylesheet">
+  <script src="https://unpkg.com/@jspsych/plugin-fullscreen@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-instructions@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.1.0"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0"></script>
+  <script src="{{ url_for('static', filename='maze-draw.js') }}"></script>
+  <script src="{{ url_for('static', filename='maze-play.js') }}"></script>
+  <script src="{{ url_for('static', filename='maze-rank.js') }}"></script>
+  <script src="{{ url_for('static', filename='maze-assign.js') }}"></script>
+  <script src="{{ url_for('static', filename='fun-game-play.js') }}"></script>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
+  
+  <script src="{{ url_for('static', filename='flappy-bird-master/flappy-bird.js') }}"></script>
+  <link href="{{ url_for('static', filename='flappy-bird-master/style.css') }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Squada+One&display=swap" rel="stylesheet">
+  <script>
+    const flappyBirdPrefix = "{{ url_for('static', filename='flappy-bird-master') }}";
+  </script>
+   <!-- <script type="module" src="{{ url_for('static', filename='script.js') }}"></script> -->
 </head>
 <body></body>
 </html>
