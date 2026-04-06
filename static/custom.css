@@ -1,0 +1,53 @@
+.jspsych-timer {
+  font-size: 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.jspsych-canvas-container {
+  cursor: pointer;
+  border: 1px solid #000000;
+  border-radius: 10%;
+  padding: 10px 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.jspsych-rank-badge {
+  pointer-events: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  font-weight: bold;
+  position: absolute;
+  transform: translate(-25%, -25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jspsych-pop-up {
+  grid-row: 1;
+  grid-column: 1;
+  width: 450px;
+  height: 275px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 10%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  display: none;
+}
+
+.jspsych-button {
+  width: 90px;
+  height: 35px;
+  margin: 10px;
+  background-color: #dddddd;
+  border: 1px solid #000000;
+  border-radius: 30px;
+}

@@ -1,5 +1,4 @@
 import flask
-from flask import render_template, request, jsonify
 import maze_generator
 import os
 import json
@@ -8,7 +7,7 @@ app = flask.Flask(__name__)
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return flask.render_template('index.html')
 
 @app.route("/generate_mazes")
 def generate_mazes_route():

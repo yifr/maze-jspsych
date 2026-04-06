@@ -19,7 +19,7 @@ def plot_maze(maze, ax, show_solution=True):
     grid = grid.at[maze.end].set(0)
     ax.imshow(grid, cmap='binary')
     ax.scatter(maze.start[1], maze.start[0], color='green', marker='s', s=300, label='Start')
-    ax.scatter(maze.end[1], maze.end[0], color='red', marker='s', s=300, label='Goal')
+    ax.scatter(maze.end[1], maze.end[0], color='red', marker='s', s=300, label='Finish')
     solution = maze.solutions[0] if maze.solutions else None
 
     if solution and show_solution:
