@@ -31,7 +31,8 @@ function drawArrowHelper(ctx, rows, cols, cs, pad, x, y, start) {
 }
 
 // Helper function to draw maze game board
-function drawHelper(ctx, maze, moves, pos, vw, vh, canvasSizeCoeff, padCoeff, centerToView) {
+function drawHelper(el, maze, moves, pos, vw, vh, canvasSizeCoeff, padCoeff, centerToView, setElWH) {
+  const ctx = el.getContext("2d");
   const colors = { bg: "#ffffff", wall: "#606060", start: "#0ea5e9", end: "#22c55e", player: "#000000" };
   
   // Maze display data
@@ -51,6 +52,11 @@ function drawHelper(ctx, maze, moves, pos, vw, vh, canvasSizeCoeff, padCoeff, ce
   const pad = Math.round(padCoeff * cs);
   const W = 2 * pad + cols * cs;
   const H = 2 * pad + rows * cs;
+  if (setElWH) {
+    console.log("set wh");
+    el.width = W;
+    el.height = H;
+  }
 
   // Draw background and walls
   ctx.fillStyle = colors.bg;

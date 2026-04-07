@@ -13,13 +13,13 @@ async function main() {
   // Create timeline
   const timeline = [];
 
-  // // Make window fullscreen
-  // timeline.push({
-  //   type: jsPsychFullscreen,
-  //   fullscreen_mode: true
-  // });
+  // Make window fullscreen
+  timeline.push({
+    type: jsPsychFullscreen,
+    fullscreen_mode: true
+  });
 
-  // Give instructions
+  // Give instructions for maze
   const instructions = {
     type: jsPsychInstructions,
     pages: [`
@@ -35,16 +35,17 @@ async function main() {
   timeline.push(instructions);
 
   // Run familiarity phase to practice solving a maze and calibrate competence
-  const familiarityPhase = (maze) => ({
+  const mazeFamiliarityPhase = (maze) => ({
     type: MazePlayPlugin,
     maze: maze,
     time_limit: null,
     data: { maze_id: maze.id, difficulty: maze.difficulty },
     on_finish: (data) => {
       timeline.push(priorPhase(maze.difficulty, Math.floor(data.rt / 1000)));
+      timeline.push(rankPhase(maze.difficulty, Math.floor(data.rt / 1000)));
     }
   });
-  timeline.push(familiarityPhase(mazes[0]));     // need to choose familiarity maze
+  timeline.push(mazeFamiliarityPhase(mazes[0]));     // need to choose familiarity maze
 
   // Collect data about participants' priors of competence
   const priorPhase = (practiceDifficulty, practiceTime) => ({
@@ -54,13 +55,12 @@ async function main() {
       <p>You finished the practice maze, which has <strong>difficulty ${practiceDifficulty}</strong>, in <strong>${Math.floor(practiceTime / 60)} min ${practiceTime % 60} sec</strong>.</p>
     `,
     questions: [
-      {prompt: "If you tried your hardest, what is the most difficult maze you believe you could complete within 2 minutes? Please enter the difficulty level:", required: true}
+      {
+        prompt: "If you tried your hardest, what is the most difficult maze you believe you could complete within 2 minutes? Please enter the difficulty level:",
+        required: true
+      }
     ],
-    on_finish: (data) => {
-      timeline.push(rankPhase(practiceDifficulty, practiceTime));
-    }
   });
-  // timeline.push(priorPhase(0, 0));
 
   // Ask participants to rank mazes in order of preference
   const rankPhase = (practiceDifficulty, practiceTime) => ({
@@ -70,10 +70,46 @@ async function main() {
     practiceDifficulty: practiceDifficulty,
     practiceTime: practiceTime,
     on_finish: (data) => {
+      timeline.push(funGameInstructions);
+      timeline.push(funGameFamiliarityPhase);
+      timeline.push(mainuplationCheckPhase);
       timeline.push(assignmentPhase(mazes, data.ordering));
     }
   });
-  // timeline.push(rankPhase(0, 0));
+
+  // Give instructions for fun game
+  const funGameInstructions = {
+    type: jsPsychInstructions,
+    pages: [`
+        <p>In addition to the maze, you'll also have the opportunity to play a game during the experiment.</p>
+        <p>To get a sense of how to play the game, you will be given <strong>one minute</strong> to practice playing it on the next screen.</p>
+        <p>To control the game, you can use the <strong>spacebar</strong>, up arrow key, W key, or left-click.</p>
+        <p>When you have read through all the instructions, please press the <strong>spacebar</strong> to start the practice game.</p>
+    `],
+    key_forward: " "
+  };
+
+  // Run familiarity phase to practice playing fun game and check manipulation
+  const funGameFamiliarityPhase = {
+    type: funGamePlayPlugin,
+    time_limit: 60
+  };
+
+  // Check whether the game was empirically fun
+  const mainuplationCheckPhase = {
+    type: jsPsychSurveyMultiChoice,
+    preamble: `
+      <p>You just finished playing a game for one minute.</p>
+    `,
+    questions: [
+      {
+        prompt: "Did you enjoy playing the game?",
+        name: "ManipulationCheck", 
+        options: ["Yes", "No"], 
+        required: true
+      }
+    ],
+  };
 
   // Assign participants to either procrastination or non-procrastination condition
   const assignmentPhase = (mazes, ordering) => ({
@@ -81,13 +117,12 @@ async function main() {
     mazes: mazes,
     ordering: ordering,
     on_finish: (data) => {
-      timeline.push(funGamePhase(data.procrastination, data.assignedMaze));
+      timeline.push(funGameFinalPhase(data.procrastination, data.assignedMaze));
     }
   });
-  // timeline.push(assignmentPhase(mazes, [0, 1, 2, 3, 4, 5]));
 
   // Start off by playing a fun game
-  const funGamePhase = (procrastination, maze) => ({
+  const funGameFinalPhase = (procrastination, maze) => ({
     type: funGamePlayPlugin,
     maze: maze,
     time_limit: 120,
@@ -96,14 +131,13 @@ async function main() {
     firstCheckIn: 15,
     on_finish: (data) => {
       if (data.reason === "switch") {
-        timeline.push(finalMazePhase(procrastination, maze, data.remaining));
+        timeline.push(mazeFinalPhase(procrastination, maze, data.remaining));
       }
     }
   })
-  // timeline.push(funGamePhase(true, mazes[5]));
 
   // Eventually switch over to solving assigned maze
-  const finalMazePhase = (procrastination, maze, remaining) => ({
+  const mazeFinalPhase = (procrastination, maze, remaining) => ({
     type: MazePlayPlugin,
     maze: maze,
     time_limit: remaining,
@@ -117,7 +151,7 @@ async function main() {
   const conclusion = (reward) => ({
     type: jsPsychInstructions,
     pages: [`
-        <p>[You have earned a reward of ${reward}! or something]</p>
+        <p>You have earned a reward of ${reward ? 50 : 0} points.</p>
         <p>Thank you for participating in this experiment!</p>
     `],
     key_forward: " "

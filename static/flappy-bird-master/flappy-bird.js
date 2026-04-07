@@ -1,5 +1,5 @@
 // Code and other materials modified from aaarafat on GitHub (source: https://github.com/aaarafat/JS-Flappy-Bird)
-function flappyBird(scrn, sctx, getPaused) {
+function flappyBird(scrn, sctx, getPaused, getT0) {
   const RAD = Math.PI / 180;
   scrn.tabIndex = 1;
   scrn.addEventListener("click", () => {
@@ -25,7 +25,7 @@ function flappyBird(scrn, sctx, getPaused) {
   });
 
   document.onkeydown = function keyDown(e) {
-    if (!getPaused() && (e.key === " " || e.key === "w" || e.key === "W" || e.key === "ArrowUp")) {
+    if (!getPaused() && performance.now() - getT0() > 500 && (e.key === " " || e.key === "w" || e.key === "W" || e.key === "ArrowUp")) {
       // Space Key or W key or arrow up
       switch (state.curr) {
         case state.getReady:

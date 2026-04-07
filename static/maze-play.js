@@ -1,5 +1,6 @@
-/* jsPsych v8 plugin (UMD/IIFE): maze-play
-   Maze format: 0 = open, 1 = wall; start/end: [x, y]
+/*
+  jsPsych plugin: maze-play
+  Renders a maze and allows participant to solve it via key controls
 */
 var MazePlayPlugin = (function (jspsych) {
   const { ParameterType } = jspsych;
@@ -20,7 +21,7 @@ var MazePlayPlugin = (function (jspsych) {
       end:         { type: ParameterType.COMPLEX },
       path:        { type: ParameterType.COMPLEX },
       events:      { type: ParameterType.COMPLEX },
-      reward:      { type: ParameterType.FLOAT }
+      reward:      { type: ParameterType.BOOL }
     }
   };
 
@@ -30,20 +31,10 @@ var MazePlayPlugin = (function (jspsych) {
 
     trial(display_element, trial) {
       // Maze display data
-      // const src = trial.maze.grid;
-      // const rows = src.length;
-      // const cols = src[0].length;
       const canvasSizeCoeff = 0.8;
       const padCoeff = 1.4;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-
-      // Copy grid and force start/end to open
-      // const [sx, sy] = trial.maze.start;
-      // const [ex, ey] = trial.maze.end;
-      // const grid = src.map(r => r.slice());
-      // grid[sy][sx] = 0;
-      // grid[ey][ex] = 0;
       
       // Display timer and maze
       display_element.innerHTML = `
@@ -53,15 +44,13 @@ var MazePlayPlugin = (function (jspsych) {
           <canvas id="maze" style="border: 1px solid #dddddd;"></canvas>
           <div id="message"></div>
         </div>`;
-      const ctx = display_element.querySelector("#maze").getContext("2d");
+      const mazeEl = display_element.querySelector("#maze");
       const timerEl = display_element.querySelector("#timer");
       const endMessage = display_element.querySelector("#message");
       endMessage.style.minHeight = "1.8em";
 
       // Initialize game board and maze constants
-      const [grid, rows, cols, sx, sy, ex, ey, W, H] = drawHelper(ctx, trial.maze, null, null, vw, vh, canvasSizeCoeff, padCoeff, false);
-      display_element.querySelector("#maze").width = `${W}`;
-      display_element.querySelector("#maze").height = `${H}`;
+      const [grid, rows, cols, sx, sy, ex, ey, W, H] = drawHelper(mazeEl, trial.maze, null, null, vw, vh, canvasSizeCoeff, padCoeff, false, true);
 
       // Style and update timer
       if (trial.time_limit) {
@@ -123,7 +112,7 @@ var MazePlayPlugin = (function (jspsych) {
 
       // Draw maze game board
       const draw = () => {
-        drawHelper(ctx, trial.maze, moves, pos, vw, vh, canvasSizeCoeff, padCoeff, false);
+        drawHelper(mazeEl, trial.maze, moves, pos, vw, vh, canvasSizeCoeff, padCoeff, false, false);
       }
 
       // Slow down movement speed
@@ -185,8 +174,9 @@ var MazePlayPlugin = (function (jspsych) {
         document.removeEventListener("keyup", keyupHandler);
 
         clearInterval(tickInterval);
-        const rt = performance.now() - t0;
-        const reward = reason === "solved" ? trial.maze.difficulty : 0;
+        const t1 = performance.now();
+        const rt = t1 - t0;
+        const reward = reason === "solved" ? true : false;
 
         // Display end message
         if (!trial.time_limit) {
@@ -200,7 +190,7 @@ var MazePlayPlugin = (function (jspsych) {
         // Finish trial after spacebar pressed
         const spaceHandler = (e) => {
           e.preventDefault();
-          if (e.key === " " && performance.now() - t0 > 1000) {
+          if (e.key === " " && performance.now() - t1 > 500) {
             document.removeEventListener("keydown", spaceHandler);
             // Finish trial
             this.jsPsych.finishTrial({

@@ -1,20 +1,20 @@
-import jax
 import json
 import numpy as np
-import jax.numpy as jnp
-from memo import memo
-from dataclasses import dataclass
 import matplotlib.pyplot as plt
 from itertools import product
+from random import choice
+import heapq
 
 from mazelib import Maze
 from mazelib.generate.Prims import Prims
 from mazelib.generate.BacktrackingGenerator import BacktrackingGenerator
 from mazelib.generate.Ellers import Ellers
 from mazelib.solve.BacktrackingSolver import BacktrackingSolver
+from mazelib.solve.MazeSolveAlgo import MazeSolveAlgo
+
 
 def plot_maze(maze, ax, show_solution=True):
-    grid = jnp.array(maze.grid, dtype=jnp.int32)
+    grid = np.array(maze.grid, dtype=np.int32)
     grid = grid.at[maze.start].set(0)
     grid = grid.at[maze.end].set(0)
     ax.imshow(grid, cmap='binary')
@@ -49,8 +49,6 @@ def plot_mazes(mazes, show_solutions=True):
     return fig
 
 
-from mazelib.solve.MazeSolveAlgo import MazeSolveAlgo
-import heapq
 
 
 class AStarSolver(MazeSolveAlgo):
@@ -116,7 +114,7 @@ class AStarSolver(MazeSolveAlgo):
             sol.append(goal)
         return sol
     
-from random import choice   
+
 class NewBacktrackingSolver(MazeSolveAlgo):
     """
     The Backtracking Solver maze solving algorithm.

@@ -1,6 +1,8 @@
-// jsPsych v8 UMD plugin: MazeRankPlugin
-// Renders multiple same-sized maze previews, user clicks one to choose.
-
+/*
+  jsPsych plugin: maze-rank
+  Renders previews of mazes and allows participant to rank/order them by
+    dragging and dropping
+*/
 var MazeRankPlugin = (function (jspsych) {
   "use strict";
   const { ParameterType } = jspsych;
@@ -70,7 +72,7 @@ var MazeRankPlugin = (function (jspsych) {
         <div style = "font-size: 16px;">
           <p>You finished the practice maze (difficulty ${practiceDifficulty}) in ${Math.floor(practiceTime / 60)} min ${practiceTime % 60} sec.</p>
           <p>Please <strong>rank the following mazes</strong> in order of preference (click and drag to reorder).<br>
-          You will be assigned <strong>one</strong> of these mazes in the main round. If you successfully complete it, you will earn a reward proportional to the difficulty level.<br>
+          You will be assigned <strong>one</strong> of these mazes in the main round. If you successfully complete it, you will earn a reward of points proportional to your monetary bonus.<br>
           Note that you will not necessarily be assigned the maze you rank first.</p>
           <p>Please press the <strong>spacebar</strong> when you are done.</p>
           <div id = "maze-grid" style = "
@@ -108,9 +110,8 @@ var MazeRankPlugin = (function (jspsych) {
         canvas.id = `maze-${id}-canvas`;
         canvas.width = side;
         canvas.height = side;
-        const ctx = canvas.getContext("2d");
         const padCoeff = 1.2;
-        drawHelper(ctx, maze, null, null, side, side, 1, padCoeff, true);
+        drawHelper(canvas, maze, null, null, side, side, 1, padCoeff, true, false);
         canvasContainer.appendChild(canvas);
 
         // Add a label
@@ -181,7 +182,6 @@ var MazeRankPlugin = (function (jspsych) {
           document.removeEventListener("keydown", spaceHandler);
           const rt = performance.now() - t0;
           const ordering = Array.from(gridDisplay.children).map(el => parseInt(el.id.match(/-\d+-/)[0].slice(1, -1)));
-          // Finish trial
           this.jsPsych.finishTrial({ rt, ordering });
         }
       }
