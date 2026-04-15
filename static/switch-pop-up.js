@@ -20,7 +20,7 @@ function switchPopUpHelper(currentlyOnGame, display_element, containerEl, checkI
           <label for = "continue-completion-prob">How likely do think you are to complete the ${currentlyOnGame ? "maze" : "game"} task if you start the next time we ask?<br></label>
           <output>50</output>%
           <input type = "range" id = "continue-completion-prob" name = "continue-completion-prob" required min = "0" max = "100"
-            value = "50" oninput = "this.previousElementSibling.value = this.value">
+            value = "50" oninput = "this.previousElementSibling.value = this.value; this.setCustomValidity('')">
         </div>
         <div>
           <button type = "submit" class = "jspsych-button">Submit</button>
@@ -47,7 +47,7 @@ function switchPopUpHelper(currentlyOnGame, display_element, containerEl, checkI
           <label for = "switch-completion-prob">How likely do think you are to complete the ${currentlyOnGame ? "maze" : "game"} task?<br></label>
           <output>50</output>%
           <input type = "range" id = "switch-completion-prob" name = "switch-completion-prob" required min = "0" max = "100"
-            value = "50" oninput = "this.previousElementSibling.value = this.value">
+            value = "50" oninput = "this.previousElementSibling.value = this.value; this.setCustomValidity('')">
         </div>
         <div>
           <button type = "submit" class = "jspsych-button">Submit</button>
@@ -70,6 +70,8 @@ function switchPopUpHelper(currentlyOnGame, display_element, containerEl, checkI
     getLog()("check-in-choose-switch");
   }
   // Handle form submissions
+  ranges = [display_element.querySelector("#continue-completion-prob"), display_element.querySelector("#switch-completion-prob")]
+  ranges.forEach((el) => (el).setCustomValidity("Please adjust the slider."));
   continuePageEl.addEventListener("submit", (e) => {
     e.preventDefault();
     const data = new FormData(continuePageEl);

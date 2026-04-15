@@ -37,6 +37,8 @@ var MazePlayPlugin = (function (jspsych) {
     static info = info;
 
     trial(display_element, trial) {
+      console.log(trial.on_success_message);
+      console.log(trial.on_timeout_message);
       // Display timer and maze
       display_element.innerHTML = `
         <div style = "font-size: 16px;">
@@ -109,7 +111,7 @@ var MazePlayPlugin = (function (jspsych) {
           } else {
             timerEl.style.color = "#000000";
           }
-          timerEl.textContent = `${Math.floor(remaining / 60)}:${(remaining % 60).toString().padStart(2, "0")}`;
+          timerEl.textContent = formatTime(remaining);
           
           if (trial.switch_after && nextCheckIn === 0 && !paused) {
             paused = true;
@@ -130,7 +132,7 @@ var MazePlayPlugin = (function (jspsych) {
       else {
         // Count up
         const updateTimer = () => {
-          timerEl.textContent = `${Math.floor(spent / 60)}:${(spent % 60).toString().padStart(2, "0")}`;
+          timerEl.textContent = formatTime(spent);
           spent++;
         };
         // Set tick interval
@@ -153,7 +155,17 @@ var MazePlayPlugin = (function (jspsych) {
       const log = (type, payload = {}) => events.push({ t: performance.now() - t0, type, payload });
       const pushPath = (dx, dy) => {
         path.push({ t: performance.now() - t0, x: pos.x, y: pos.y });
-        moves.push([dx, dy]);
+        if (dx !== 0 && dy !== 0) {
+          if (isOpen(pos.x, pos.y - dy)) {
+            moves.push([dx, 0]);
+            moves.push([0, dy]);
+          } else {
+            moves.push([0, dy]);
+            moves.push([dx, 0]);
+          }
+        } else {
+          moves.push([dx, dy]);
+        }
       }
 
       const inBounds = (x,y) => x >= 0 && x < cols && y >= 0 && y < rows;
@@ -175,10 +187,10 @@ var MazePlayPlugin = (function (jspsych) {
 
         let dx = 0;
         let dy = 0;
-        if (keys["ArrowLeft"] || keys["a"] || keys["A"]) dx = -1;
-        if (keys["ArrowRight"] || keys["d"] || keys["D"]) dx = 1;
-        if (keys["ArrowUp"] || keys["w"] || keys["W"]) dy = -1;
-        if (keys["ArrowDown"] || keys["s"] || keys["S"]) dy = 1;
+        if (keys["ArrowLeft"] || keys["a"] || keys["A"]) dx -= 1;
+        if (keys["ArrowRight"] || keys["d"] || keys["D"]) dx += 1;
+        if (keys["ArrowUp"] || keys["w"] || keys["W"]) dy -= 1;
+        if (keys["ArrowDown"] || keys["s"] || keys["S"]) dy += 1;
 
         const nx = pos.x + dx, ny = pos.y + dy;
         if ((dx !== 0 || dy !== 0) && isOpen(nx, ny)) {

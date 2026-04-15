@@ -18,7 +18,7 @@ var funGamePlayPlugin = (function (jspsych) {
       on_success_message:     { type: ParameterType.STRING, default: "Congrats! You finished the game." },
       on_timeout_message:     { type: ParameterType.STRING, default: "Unfortunately, you have run out of time." },
       checkInInterval:        { type: ParameterType.INT, default: 15 },
-      firstCheckIn:           { type: ParameterType.INT, default: 15 }
+      firstCheckIn:           { type: ParameterType.INT, default: 1 }
     },
     data: {
       rt:                     { type: ParameterType.FLOAT },
@@ -34,6 +34,8 @@ var funGamePlayPlugin = (function (jspsych) {
     static info = info;
 
     trial(display_element, trial) {
+      console.log(trial.on_success_message);
+      console.log(trial.on_timeout_message);
       // Display timer and maze
       display_element.innerHTML = `
         <div style = "font-size: 16px;">
@@ -84,13 +86,9 @@ var funGamePlayPlugin = (function (jspsych) {
       const checkIn = trial.switch_after ? switchPopUpHelper(true, display_element, containerEl, trial.checkInInterval, updateNextCheckIn, () => log, () => end) : () => {};
 
       // Game status data and logging functions
-      // const pos  = { x: sx, y: sy };
-      // const goal = { x: ex, y: ey };
       const t0 = performance.now();
       const events = [];
-      // let solved = false;
       let timeout_hit = false;
-      // let animationFrameId = null;
       const log = (type, payload = {}) => {console.log("log, " + type); events.push({ t: performance.now() - t0, type, payload });}
       // const pushPath = (dx, dy) => {
       //   path.push({ t: performance.now() - t0, x: pos.x, y: pos.y });
@@ -105,7 +103,6 @@ var funGamePlayPlugin = (function (jspsych) {
       if (trial.time_limit) {
         // Count down
         const updateTimer = () => {
-          console.log(nextCheckIn);
           if (remaining <= 0) {
             paused = true;
             timeout_hit = true;
@@ -117,7 +114,7 @@ var funGamePlayPlugin = (function (jspsych) {
           } else {
             timerEl.style.color = "#000000";
           }
-          timerEl.textContent = `${Math.floor(remaining / 60)}:${(remaining % 60).toString().padStart(2, "0")}`;
+          timerEl.textContent = formatTime(remaining);
 
           if (trial.switch_after && nextCheckIn === 0 && !paused) {
             paused = true;
@@ -137,7 +134,7 @@ var funGamePlayPlugin = (function (jspsych) {
       } else {
         // Count up
         const updateTimer = () => {
-          timerEl.textContent = `${Math.floor(spent / 60)}:${(spent % 60).toString().padStart(2, "0")}`;
+          timerEl.textContent = formatTime(spent);
           spent++;
         };
         // Set tick interval

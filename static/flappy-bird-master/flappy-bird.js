@@ -89,7 +89,7 @@ function flappyBird(scrn, sctx, difficulty, getPaused, getT0, scoreGoal, end) {
   const pipe = {
     top: { sprite: new Image() },
     bot: { sprite: new Image() },
-    gap: (difficulty == 0 ? 95 : 75),
+    gap: (difficulty == 0 ? 100 : 80),
     moved: true,
     pipes: [],
     draw: function () {
