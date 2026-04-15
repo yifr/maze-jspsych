@@ -34,6 +34,7 @@ async function main() {
     <p>In this experiment, you will be asked to complete <strong>mazes</strong> and to play a <strong>game</strong>.</p>
     <p>There are two rounds to the experiment. Each round will consist of a <strong>practice phase</strong> and a <strong>trial phase</strong>.</br>
     You will have an opportunity to earn a point reward in the trial phases, which will determine your monetary bonus.</p>
+    <p>When you have read through all the instructions, please press the <strong>spacebar</strong> to move to the next screen</p>
 `));
 
   const formatTime = (time, simplify = false) => {
