@@ -41,8 +41,10 @@ function drawHelper(el, maze, moves, pos, vw, vh, canvasSizeCoeff, padCoeff, cen
   const cols = src[0].length;
 
   // Copy grid and force start/end to open
-  const [sx, sy] = maze.start;
-  const [ex, ey] = maze.end;
+  // console.log(maze);
+  // console.log(maze.start);
+  const [sy, sx] = maze.start;
+  const [ey, ex] = maze.end;
   const grid = src.map(g => g.slice());
   grid[sy][sx] = 0;
   grid[ey][ex] = 0;
@@ -53,7 +55,6 @@ function drawHelper(el, maze, moves, pos, vw, vh, canvasSizeCoeff, padCoeff, cen
   const W = 2 * pad + cols * cs;
   const H = 2 * pad + rows * cs;
   if (setElWH) {
-    console.log("set wh");
     el.width = W;
     el.height = H;
   }

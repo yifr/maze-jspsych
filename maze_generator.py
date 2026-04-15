@@ -1,5 +1,6 @@
+import os
 import json
-import numpy as np
+import jax.numpy as np
 import matplotlib.pyplot as plt
 from itertools import product
 from random import choice
@@ -12,6 +13,8 @@ from mazelib.generate.Ellers import Ellers
 from mazelib.solve.BacktrackingSolver import BacktrackingSolver
 from mazelib.solve.MazeSolveAlgo import MazeSolveAlgo
 
+
+lst = []
 
 def plot_maze(maze, ax, show_solution=True):
     grid = np.array(maze.grid, dtype=np.int32)
@@ -46,6 +49,7 @@ def plot_mazes(mazes, show_solutions=True):
             ax.set_title(f'Maze {i+1} Solution', fontsize=16)
 
     plt.tight_layout()
+    plt.show()
     return fig
 
 
@@ -165,7 +169,7 @@ def generate_monte_carlo_weighted(self, repeat, entrances=3, difficulty=1.0, alp
             self.generate_entrances()
             self.solve()
             length = len(self.solutions[0]) if self.solutions and self.solutions[0] else float("inf")
-            backtracks = getattr(self.solver, "backtracks", 0)
+            backtracks = self.solver.backtracks
             trials.append({
                 "grid": self.grid.copy(),
                 "start": self.start,
@@ -180,6 +184,12 @@ def generate_monte_carlo_weighted(self, repeat, entrances=3, difficulty=1.0, alp
     trials.sort(key=lambda t: t["score"])
     idx = int((len(trials) - 1) * difficulty)
     chosen = trials[idx]
+    print("----")
+    # print([t["length"] for t in trials])
+    lst.append(chosen["length"])
+    print(chosen["solutions"])
+    print(chosen["start"])
+    print(chosen["end"])
 
     self.grid = chosen["grid"]
     self.start = chosen["start"]
@@ -190,32 +200,40 @@ def generate_monte_carlo_weighted(self, repeat, entrances=3, difficulty=1.0, alp
 
 def generate_mazes():
     """Generate a set of mazes with varying sizes and difficulties."""
-    maze_generators = [Prims, BacktrackingGenerator, Ellers]
+    # maze_generators = [Prims, BacktrackingGenerator, Ellers]
+    maze_generators = [Prims, BacktrackingGenerator]
+    # maze_generators = [Prims]
+    maze_generators = [BacktrackingGenerator]
     mazes = []
-    difficulties = [0.0, 1.0]
-    sizes = [10, 15, 20]
-    maze_params = list(product(sizes, difficulties))
+    difficulty = 0.5
+    sizes = [15, 15, 15, 20]
     Maze.generate_monte_carlo_weighted = generate_monte_carlo_weighted
 
-    for size, difficulty in maze_params:
+    for size in sizes:
         m = Maze()
-        generator = np.random.choice(maze_generators)
+        generator = choice(maze_generators)
         m.generator = generator(size, size)
         m.solver = AStarSolver()
-        n_grids = 200
+        # m.solver = NewBacktrackingSolver()
+        n_grids = 300
         n_paths = 1
-        m.generate_monte_carlo_weighted(n_grids, n_paths, difficulty, alpha=1)
+        m.generate_monte_carlo_weighted(n_grids, n_paths, difficulty, alpha=0.9)
         mazes.append(m)
 
     return mazes
 
 if __name__ == "__main__":
     mazes = generate_mazes()
-    # Save the mazes 
-    with open("models/mazes.json", "w") as f:
+    # Save the mazes
+    with open(os.path.dirname(__file__) + "/mazes.json", "w") as f:
         json.dump([{
             "grid": m.grid.tolist(),
             "start": m.start,
             "end": m.end,
             "difficulty": m.difficulty
         } for m in mazes], f)
+    
+
+    plot_mazes(mazes)
+
+print(lst)

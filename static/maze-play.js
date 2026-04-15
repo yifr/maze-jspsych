@@ -9,19 +9,26 @@ var MazePlayPlugin = (function (jspsych) {
     name: "maze-play",
     version: "1.0",
     parameters: {
-      maze:        { type: ParameterType.COMPLEX, default: undefined },
-      time_limit:  { type: ParameterType.INT, default: null }
+      time_limit:             { type: ParameterType.INT, default: null },
+      maze:                   { type: ParameterType.COMPLEX, default: undefined },
+      difficulty:             { type: ParameterType.INT, default: 0 },
+      switch_after:           { type: ParameterType.BOOL, default: false },
+      on_success_message:     { type: ParameterType.STRING, default: "Congrats! You finished the maze." },
+      on_timeout_message:     { type: ParameterType.STRING, default: "Unfortunately, you have run out of time." },
+      checkInInterval:        { type: ParameterType.INT, default: 15 },
+      firstCheckIn:           { type: ParameterType.INT, default: 15 }
     },
     data: {
-      rt:          { type: ParameterType.FLOAT },
-      reason:      { type: ParameterType.STRING },
-      solved:      { type: ParameterType.BOOL },
-      timeout:     { type: ParameterType.BOOL },
-      start:       { type: ParameterType.COMPLEX },
-      end:         { type: ParameterType.COMPLEX },
-      path:        { type: ParameterType.COMPLEX },
-      events:      { type: ParameterType.COMPLEX },
-      reward:      { type: ParameterType.BOOL }
+      rt:                     { type: ParameterType.FLOAT },
+      reason:                 { type: ParameterType.STRING },
+      solved:                 { type: ParameterType.BOOL },
+      time_remaining_or_spent:{ type: ParameterType.INT },
+      timeout:                { type: ParameterType.BOOL },
+      start:                  { type: ParameterType.COMPLEX },
+      end:                    { type: ParameterType.COMPLEX },
+      path:                   { type: ParameterType.COMPLEX },
+      events:                 { type: ParameterType.COMPLEX },
+      reward:                 { type: ParameterType.BOOL }
     }
   };
 
@@ -30,34 +37,69 @@ var MazePlayPlugin = (function (jspsych) {
     static info = info;
 
     trial(display_element, trial) {
-      // Maze display data
-      const canvasSizeCoeff = 0.8;
-      const padCoeff = 1.4;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      
       // Display timer and maze
       display_element.innerHTML = `
-        <div style="font-size: 16px;">
-          Time ${trial.time_limit ? "remaining" : "spent"}:
-          <div id="timer" class = "jspsych-timer" style="margin-bottom: 6px;"></div>
-          <canvas id="maze" style="border: 1px solid #dddddd;"></canvas>
-          <div id="message"></div>
+        <div style = "font-size: 16px;">
+          <div id = "header">
+            <div>
+              Difficulty: ${trial.difficulty == 0 ? "3" : "6"}</br>
+              Time ${trial.time_limit ? "remaining" : "spent"}:
+              <div id = "timer" class = "jspsych-timer" style = "margin-bottom: 6px;"></div>
+            </div>
+          </div>
+          <div id = "maze-and-pop-up-container" style = "display: grid; place-content: center; place-items: center;">
+            <canvas id = "maze" style = "grid-row: 1; grid-column: 1; border: 1px solid #dddddd;"></canvas>
+          </div>
+          <div id = "message"></div>
         </div>`;
+
+      const gameSize = 90;
+      
       const mazeEl = display_element.querySelector("#maze");
       const timerEl = display_element.querySelector("#timer");
       const endMessage = display_element.querySelector("#message");
       endMessage.style.minHeight = "1.8em";
 
+      if (trial.switch_after) {
+        const header = display_element.querySelector("#header");
+        header.style = "display: flex; justify-content: space-between; align-items: center;";
+        const upNext = document.createElement("div");
+        upNext.innerHTML = `Up next:
+          <div><canvas id = "game" style = "border: 1px solid #dddddd;"></canvas></div>`;
+        header.appendChild(upNext);
+
+        const gameEl = display_element.querySelector("#game");
+        gameEl.width = gameSize;
+        gameEl.height = gameSize;
+
+        // Initialize game preview image
+        gamePreviewHelper(gameEl, gameSize);
+      }
+
+      const containerEl = display_element.querySelector("#maze-and-pop-up-container");
+
+      const updateNextCheckIn = (newVal) => {
+        nextCheckIn = newVal;
+      };
+      const checkIn = trial.switch_after ? switchPopUpHelper(false, display_element, containerEl, trial.checkInInterval, updateNextCheckIn, () => log, () => end) : () => {};
+
       // Initialize game board and maze constants
+      const canvasSizeCoeff = 0.8;
+      const padCoeff = 1.4;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
       const [grid, rows, cols, sx, sy, ex, ey, W, H] = drawHelper(mazeEl, trial.maze, null, null, vw, vh, canvasSizeCoeff, padCoeff, false, true);
 
       // Style and update timer
+      let paused = false;
+      let nextCheckIn = trial.switch_after ? trial.firstCheckIn : null;
+      let remaining = trial.time_limit;
+      let spent = 0;
       if (trial.time_limit) {
         // Count down
-        let remaining = trial.time_limit;
         const updateTimer = () => {
           if (remaining <= 0) {
+            paused = true;
             timeout_hit = true;
             log("timeout");
             end("timeout");
@@ -68,7 +110,15 @@ var MazePlayPlugin = (function (jspsych) {
             timerEl.style.color = "#000000";
           }
           timerEl.textContent = `${Math.floor(remaining / 60)}:${(remaining % 60).toString().padStart(2, "0")}`;
-          remaining--;
+          
+          if (trial.switch_after && nextCheckIn === 0 && !paused) {
+            paused = true;
+            checkIn();
+          } else if (trial.switch_after && nextCheckIn !== 0) {
+            paused = false;
+            nextCheckIn--;
+          }
+          if (!paused) remaining--;
         };
         // Set tick interval
         updateTimer();
@@ -79,7 +129,6 @@ var MazePlayPlugin = (function (jspsych) {
       }
       else {
         // Count up
-        let spent = 0;
         const updateTimer = () => {
           timerEl.textContent = `${Math.floor(spent / 60)}:${(spent % 60).toString().padStart(2, "0")}`;
           spent++;
@@ -126,14 +175,13 @@ var MazePlayPlugin = (function (jspsych) {
 
         let dx = 0;
         let dy = 0;
-        // need to fix multiple keys thing :/
         if (keys["ArrowLeft"] || keys["a"] || keys["A"]) dx = -1;
         if (keys["ArrowRight"] || keys["d"] || keys["D"]) dx = 1;
         if (keys["ArrowUp"] || keys["w"] || keys["W"]) dy = -1;
         if (keys["ArrowDown"] || keys["s"] || keys["S"]) dy = 1;
 
         const nx = pos.x + dx, ny = pos.y + dy;
-        if (isOpen(nx, ny)) {
+        if ((dx !== 0 || dy !== 0) && isOpen(nx, ny)) {
           pos.x = nx; pos.y = ny;
           pushPath(dx, dy); log("move_ok", {to: [nx, ny]});
           if (nx === goal.x && ny === goal.y) {
@@ -162,8 +210,10 @@ var MazePlayPlugin = (function (jspsych) {
 
       // Game loop
       const loop = () => {
-        updatePosition();
-        draw();
+        if (!paused) {
+          updatePosition();
+          draw();
+        }
         animationFrameId = requestAnimationFrame(loop);
       };
 
@@ -179,12 +229,17 @@ var MazePlayPlugin = (function (jspsych) {
         const reward = reason === "solved" ? true : false;
 
         // Display end message
-        if (!trial.time_limit) {
-          endMessage.innerHTML = "Congrats! You finished the practice maze. Please press the spacebar when you're ready to move on to the next screen.";
+        if (reason === "switch") {
+          this.jsPsych.finishTrial({
+            rt, reason, solved, time_remaining_or_spent: (trial.time_limit ? remaining : spent), timeout: timeout_hit,
+            start: [sx, sy], end: [ex, ey],
+            path, events, reward
+          });
+          return;
         } else if (reason === "solved") {
-          endMessage.innerHTML = "Congrats! You finished the maze. Please press the spacebar to move on to the next screen.";
-        } else {
-          endMessage.innerHTML = "Unfortunately, you have run out of time. Please press the spacebar to move on to the next screen.";
+          endMessage.innerHTML = trial.on_success_message + " Please press the spacebar to move on to the next screen.";
+        } else if (reason === "timeout") {
+          endMessage.innerHTML = trial.on_timeout_message + " Please press the spacebar to move on to the next screen.";
         }
         
         // Finish trial after spacebar pressed
@@ -194,7 +249,7 @@ var MazePlayPlugin = (function (jspsych) {
             document.removeEventListener("keydown", spaceHandler);
             // Finish trial
             this.jsPsych.finishTrial({
-              rt, reason, solved, timeout: timeout_hit, 
+              rt, reason, solved, time_remaining_or_spent: (trial.time_limit ? remaining + 1 : spent - 1), timeout: timeout_hit, 
               start: [sx, sy], end: [ex, ey],
               path, events, reward
             });

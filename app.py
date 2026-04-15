@@ -12,9 +12,12 @@ def home():
 @app.route("/generate_mazes")
 def generate_mazes_route():
     if os.path.exists("mazes.json"):
+        print("it exists")
         with open("mazes.json", "r") as f:
             mazes = json.load(f)
         return flask.jsonify(mazes)
+
+    print("why doesnt it exist")
     
     mazes = maze_generator.generate_mazes()
     result = []

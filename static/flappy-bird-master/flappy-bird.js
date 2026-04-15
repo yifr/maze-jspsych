@@ -1,5 +1,5 @@
 // Code and other materials modified from aaarafat on GitHub (source: https://github.com/aaarafat/JS-Flappy-Bird)
-function flappyBird(scrn, sctx, getPaused, getT0) {
+function flappyBird(scrn, sctx, difficulty, getPaused, getT0, scoreGoal, end) {
   const RAD = Math.PI / 180;
   scrn.tabIndex = 1;
   scrn.addEventListener("click", () => {
@@ -89,7 +89,7 @@ function flappyBird(scrn, sctx, getPaused, getT0) {
   const pipe = {
     top: { sprite: new Image() },
     bot: { sprite: new Image() },
-    gap: 90,
+    gap: (difficulty == 0 ? 95 : 75),
     moved: true,
     pipes: [],
     draw: function () {
@@ -214,6 +214,10 @@ function flappyBird(scrn, sctx, getPaused, getT0) {
           UI.score.curr++;
           SFX.score.play();
           pipe.moved = false;
+          // If goal achieved, end game
+          if (scoreGoal && UI.score.curr >= scoreGoal) {
+            end("goal reached");
+          }
         }
       }
     },
@@ -341,4 +345,15 @@ function flappyBird(scrn, sctx, getPaused, getT0) {
   setInterval(() => { 
     // console.log(`flappy ${getPaused()}`);
     if (!getPaused()) { gameLoop(); } }, 20);
+
+  return () => UI.score.curr;
+}
+
+function gamePreviewHelper(el, size) {
+  const ctx = el.getContext("2d");
+  const preview = new Image();
+  preview.onload = function () {
+    ctx.drawImage(preview, 0, 0, size, size);
+  };
+  preview.src = flappyBirdPrefix + "/img/preview.png";
 }
