@@ -17,10 +17,9 @@ function switchPopUpHelper(currentlyOnGame, display_element, containerEl, checkI
           <div id = ask-again-options style = "display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 15px;"></div>
         </div>
         <div style = "margin: 10px;">
-          <label for = "continue-completion-prob">How likely do think you are to complete the ${currentlyOnGame ? "maze" : "game"} task if you start the next time we ask?<br></label>
-          <output>50</output>%
-          <input type = "range" id = "continue-completion-prob" name = "continue-completion-prob" required min = "0" max = "100"
-            value = "50" oninput = "this.previousElementSibling.value = this.value; this.setCustomValidity('')">
+          <label for = "continue-completion-prob">How likely do think you are to complete the ${currentlyOnGame ? "maze" : "game"} task if you start the next time we ask? (<output id = "out-continue" style = "font-weight: bold;">50</output>/100)<br></label>
+          <input type = "range" id = "continue-completion-prob" name = "continue-completion-prob"  style = "width: 200px" required min = "0" max = "100"
+            value = "50" oninput = "document.getElementById('out-continue').value = this.value; this.setCustomValidity('')">
         </div>
         <div>
           <button type = "submit" class = "jspsych-button">Submit</button>
@@ -44,10 +43,9 @@ function switchPopUpHelper(currentlyOnGame, display_element, containerEl, checkI
           You selected "Switch". You will now begin your attempt to ${currentlyOnGame ? "solve the maze" : "play the game"} in the time remaining.
         </div>
         <div style = "margin: 10px;">
-          <label for = "switch-completion-prob">How likely do think you are to complete the ${currentlyOnGame ? "maze" : "game"} task?<br></label>
-          <output>50</output>%
-          <input type = "range" id = "switch-completion-prob" name = "switch-completion-prob" required min = "0" max = "100"
-            value = "50" oninput = "this.previousElementSibling.value = this.value; this.setCustomValidity('')">
+          <label for = "switch-completion-prob">How likely do think you are to complete the ${currentlyOnGame ? "maze" : "game"} task? (<output id = "out-switch" style = "font-weight: bold;">50</output>/100)<br></label>
+          <input type = "range" id = "switch-completion-prob" name = "switch-completion-prob"  style = "width: 200px" required min = "0" max = "100"
+            value = "50" oninput = "document.getElementById('out-switch').value = this.value; this.setCustomValidity('')">
         </div>
         <div>
           <button type = "submit" class = "jspsych-button">Submit</button>

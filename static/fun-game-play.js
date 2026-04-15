@@ -18,7 +18,7 @@ var funGamePlayPlugin = (function (jspsych) {
       on_success_message:     { type: ParameterType.STRING, default: "Congrats! You finished the game." },
       on_timeout_message:     { type: ParameterType.STRING, default: "Unfortunately, you have run out of time." },
       checkInInterval:        { type: ParameterType.INT, default: 15 },
-      firstCheckIn:           { type: ParameterType.INT, default: 1 }
+      firstCheckIn:           { type: ParameterType.INT, default: 15 }
     },
     data: {
       rt:                     { type: ParameterType.FLOAT },

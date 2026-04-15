@@ -36,20 +36,15 @@ async function main() {
   // Check whether a task was empirically fun
   const manipulationCheck = (activity, time_spent) => ({
     type: jsPsychSurveyHtmlForm,
-    preamble: `
-      <p>You just finished ${activity} for ${formatTime(time_spent, "other")}.</p>
-    `,
+    preamble: `<p>You just finished ${activity} for ${formatTime(time_spent, "other")}.</p>`,
     on_start: function(trial) {
       if (!time_spent) {
         const data = jsPsych.data.get().last(1).values()[0];
         const data_time_spent = data.time_remaining_or_spent;
-        trial.preamble = `
-          <p>You just finished ${activity} for ${formatTime(data_time_spent, "other")}.</p>
-        `;
+        trial.preamble = `<p>You just finished ${activity} for ${formatTime(data_time_spent, "other")}.</p>`;
       }
     },
-    html:
-      generateManipulationCheckHtml("enjoyment", "How much did you enjoy the task?", "Strongly disliked", "Strongly liked") +
+    html: generateManipulationCheckHtml("enjoyment", "How much did you enjoy the task?", "Strongly disliked", "Strongly liked") +
       generateManipulationCheckHtml("avoidance", "How much would you want to do that type of task again?", "Strongly don't want to", "Strongly want to"),
     on_load() {
       ranges = [document.querySelector("#enjoyment"), document.querySelector("#avoidance")]
