@@ -42,6 +42,7 @@ var funGamePlayPlugin = (function (jspsych) {
           <div id = "header">
             <div>
               Difficulty: ${trial.difficulty == 0 ? "3" : "6"}</br>
+              Best score: <span id = "best-score" style = "font-weight: bold;">0</span></br>
               Time ${trial.time_limit ? "remaining" : "spent"}:
               <div id = "timer" class = "jspsych-timer" style = "margin-bottom: 6px;"></div>
             </div>
@@ -53,6 +54,15 @@ var funGamePlayPlugin = (function (jspsych) {
 
       const gameSize = 600;
       const mazeSize = 90;
+
+      let bestScore = 0;
+      const bestScoreEl = display_element.querySelector("#best-score");
+      const updateBestScore = (newScore) => {
+        if (newScore > bestScore) {
+          bestScore = newScore;
+          bestScoreEl.textContent = bestScore;
+        }
+      };
 
       const timerEl = display_element.querySelector("#timer");
 
@@ -93,7 +103,7 @@ var funGamePlayPlugin = (function (jspsych) {
       // const pushPath = (dx, dy) => {
       //   path.push({ t: performance.now() - t0, x: pos.x, y: pos.y });
       //   moves.push([dx, dy]);
-      // }      
+      // }
 
       // Style and update timer
       let paused = false;
@@ -183,7 +193,7 @@ var funGamePlayPlugin = (function (jspsych) {
       };
 
       // Play fun game
-      flappyBird(game, gameCtx, trial.difficulty, () => paused, () => t0, trial.score_goal, end);
+      flappyBird(game, gameCtx, trial.difficulty, () => paused, () => t0, trial.score_goal, updateBestScore, end);
     }
   }
 

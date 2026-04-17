@@ -13,11 +13,11 @@ async function main() {
   // Create timeline
   const timeline = [];
 
-  // // Make window fullscreen
-  // timeline.push({
-  //   type: jsPsychFullscreen,
-  //   fullscreen_mode: true
-  // });
+  // Make window fullscreen
+  timeline.push({
+    type: jsPsychFullscreen,
+    fullscreen_mode: true
+  });
 
   // Give instructions for maze
   const instructions = (page) => ({
@@ -30,7 +30,7 @@ async function main() {
     <p>In this experiment, you will be asked to complete <strong>mazes</strong> and to play a <strong>game</strong>.</p>
     <p>There are two rounds to the experiment. Each round will consist of a <strong>practice phase</strong> and a <strong>trial phase</strong>.</br>
     You will have an opportunity to earn a point reward in the trial phases, which will determine your monetary bonus.</p>
-    <p>When you have read through all the instructions, please press the <strong>spacebar</strong> to move to the next screen</p>
+    <p>When you have read through all the instructions, please press the <strong>spacebar</strong> to move to the next screen.</p>
 `));
   
   // Check whether a task was empirically fun
@@ -45,9 +45,11 @@ async function main() {
       }
     },
     html: generateManipulationCheckHtml("enjoyment", "How much did you enjoy the task?", "Strongly disliked", "Strongly liked") +
-      generateManipulationCheckHtml("avoidance", "How much would you want to do that type of task again?", "Strongly don't want to", "Strongly want to"),
+      generateManipulationCheckHtml("avoidance", "How willing would you be to do this task again in the future?", "Avoid at all costs", "Would love to") +
+      generateManipulationCheckHtml("avoidance-higher", "How willing would you be to do this task again but at a higher difficulty in the future?", "Avoid at all costs", "Would love to") +
+      generateManipulationCheckHtml("avoidance-lower", "How willing would you be to do this task again but at a lower difficulty in the future?", "Avoid at all costs", "Would love to"),
     on_load() {
-      ranges = [document.querySelector("#enjoyment"), document.querySelector("#avoidance")]
+      ranges = [document.querySelector("#enjoyment"), document.querySelector("#avoidance"), document.querySelector("#avoidance-higher"), document.querySelector("#avoidance-lower")]
       ranges.forEach((el) => (el).setCustomValidity("Please adjust the slider."));
     }
   });
@@ -132,7 +134,7 @@ async function main() {
     timeline.push(instructions(generateInstructions(round, 3, true, trialTimeLimit)));
     timeline.push(gamePhase(
       trialTimeLimit, 0, null,
-      false, true, mazes[1]
+      false, true, mazes[3]
     ));
     timeline.push(mazePhase(
       trialTimeLimit, 1, mazes[3],
@@ -176,21 +178,19 @@ async function main() {
     ));
   };
 
-  // Randomize condition order
+  // Randomize condition assignment
   if (Math.random() < 0.5) {
     procrastinationConditionRound(1, 45, 120);
-    nonProcrastinationConditionRound(2, 45, 120);
   } else {
-    // nonProcrastinationConditionRound(2, 45, 120);
-    procrastinationConditionRound(1, 45, 120);
+    nonProcrastinationConditionRound(1, 45, 120);
   }
 
   // Conclude experiment
   const conclusion = () => ({
     type: jsPsychInstructions,
     pages: [`
-        <p>You have earned a reward of ${reward} points.</p>
-        <p>Thank you for participating in this experiment!</p>
+      <p>You have earned a reward of ${reward} points.</p>
+      <p>Thank you for participating in this experiment!</p>
     `],
     key_forward: " "
   });

@@ -1,5 +1,5 @@
 // Code and other materials modified from aaarafat on GitHub (source: https://github.com/aaarafat/JS-Flappy-Bird)
-function flappyBird(scrn, sctx, difficulty, getPaused, getT0, scoreGoal, end) {
+function flappyBird(scrn, sctx, difficulty, getPaused, getT0, scoreGoal, updateBestScore, end) {
   const RAD = Math.PI / 180;
   scrn.tabIndex = 1;
   scrn.addEventListener("click", () => {
@@ -214,6 +214,8 @@ function flappyBird(scrn, sctx, difficulty, getPaused, getT0, scoreGoal, end) {
           UI.score.curr++;
           SFX.score.play();
           pipe.moved = false;
+          // Update best score
+          updateBestScore(UI.score.curr);
           // If goal achieved, end game
           if (scoreGoal && UI.score.curr >= scoreGoal) {
             end("goal reached");
